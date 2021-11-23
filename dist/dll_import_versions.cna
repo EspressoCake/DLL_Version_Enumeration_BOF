@@ -1,0 +1,99 @@
+#############################################
+# Author:   Justin Lucas (@the_bit_diddler) #
+# Credits:  @N4k3dTurtl3 for the PoC code!  #
+#############################################
+
+# dll_import_versions.x64.o
+beacon_command_register(
+"dll_version_info",
+"Fetches DLL version information for detected loads in a process",
+"Synopsis: dll_version_info help");
+
+
+alias dll_version_info {
+    local('$handle $args $data');
+    local('$helpString');
+
+    # Generate helpful information
+    $helpString =  "\n";
+    $helpString .= "Usage: dll_version_info [verbose] [dll_name_needle]\n";
+    $helpString .= "\tDefault usage without arguments -> will only retrieve a list of associated DLLs.\n";
+    $helpString .= "\tverbose -> provides a list of ALL DLL names associated with the current process.\n";
+    $helpString .= "\tdll_name_needle -> a case sensitive string that is meant to match a loaded resource.  Will display version info if matched.\n";
+
+
+    if ((size(@_) == 2) && ($2 ismatch "help")) {
+        blog($1, $helpString);
+        return;
+    } 
+
+    if (size(@_) == 1)
+    {
+        if ((barch($1) ismatch "x64") && (binfo($1, "os") ismatch "Windows")) {
+            #blog($1, "x64");
+            $handle = openf(script_resource("dll_import_versions.x64.o"));
+            $data = readb($handle, -1);
+            closef($handle);
+
+            
+            $args = bof_pack($1, "i", 0);
+            beacon_inline_execute($1, $data, "Orchestrate", $args);
+        } else if ((barch($1) ismatch "x86") && (binfo($1, "os") ismatch "Windows")) {
+            #blog($1, "x86");
+            $handle = openf(script_resource("dll_import_versions.x86.o"));
+            $data = readb($handle, -1);
+            closef($handle);
+
+            $args = bof_pack($1, "i", 0);
+            beacon_inline_execute($1, $data, "Orchestrate", $args);
+        } else {
+            berror($1, "No matching architecture or operating system detected!");
+        }
+    } 
+    
+    if (size(@_) == 2) {
+        if ((barch($1) ismatch "x64") && (binfo($1, "os") ismatch "Windows")) {
+            #blog($1, "x64");
+            $handle = openf(script_resource("dll_import_versions.x64.o"));
+            $data = readb($handle, -1);
+            closef($handle);
+
+            
+            $args = bof_pack($1, "i", 1);
+            beacon_inline_execute($1, $data, "Orchestrate", $args);
+        } else if ((barch($1) ismatch "x86") && (binfo($1, "os") ismatch "Windows")) {
+            #blog($1, "x86");
+            $handle = openf(script_resource("dll_import_versions.x86.o"));
+            $data = readb($handle, -1);
+            closef($handle);
+
+            $args = bof_pack($1, "i", 1);
+            beacon_inline_execute($1, $data, "Orchestrate", $args);
+        } else {
+            berror($1, "No matching architecture or operating system detected!");
+        }
+    }
+
+        if (size(@_) == 3) {
+        if ((barch($1) ismatch "x64") && (binfo($1, "os") ismatch "Windows")) {
+            #blog($1, "x64");
+            $handle = openf(script_resource("dll_import_versions.x64.o"));
+            $data = readb($handle, -1);
+            closef($handle);
+
+            
+            $args = bof_pack($1, "iZ", 1, $3);
+            beacon_inline_execute($1, $data, "OrchestrateWithNeedle", $args);
+        } else if ((barch($1) ismatch "x86") && (binfo($1, "os") ismatch "Windows")) {
+            #blog($1, "x86");
+            $handle = openf(script_resource("dll_import_versions.x86.o"));
+            $data = readb($handle, -1);
+            closef($handle);
+
+            $args = bof_pack($1, "iZ", 1, $3);
+            beacon_inline_execute($1, $data, "OrchestrateWithNeedle", $args);
+        } else {
+            berror($1, "No matching architecture or operating system detected!");
+        }
+    }
+}
